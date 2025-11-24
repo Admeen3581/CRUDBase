@@ -1,7 +1,10 @@
+//Imports
 import express from 'express';
 import mongoose from 'mongoose';
+//const author = require('./models/author') <== Build a JS model
 
 const app = express();
+app.use(express.json());//Use JSON for everything
 //.env init
 const dbUser = process.env.MONGO_USER;
 const dbPass = process.env.MONGO_PASS;
@@ -28,6 +31,19 @@ app.get("/", (req, res) =>
 app.get("/books", (req, res) =>
 {
 	//return all books (title & id) -- additionally, prep for query input -> undef, true, & false
+	const avail = req.query;
+	switch(avail)
+	{
+		case "true":
+			//get all available books
+			break;
+		case "false":
+			//get all unavailable books
+			break;
+		default:
+			//get all books (no query provided)
+			break;
+	}
 })
 
 app.get("/books/:id", (req, res) =>
