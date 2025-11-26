@@ -1,15 +1,18 @@
 //Imports
 import express from 'express';
 import mongoose from 'mongoose';
-//const author = require('./models/author') <== Build a JS model
+import BookRoute from './routes/Book.route.js';
 
-const app = express();
-app.use(express.json());//Use JSON for everything
 //.env init
 const dbUser = process.env.MONGO_USER;
 const dbPass = process.env.MONGO_PASS;
+const databaseName = process.env.MONGO_BASE;
+
 //server init
-mongoose.connect(`mongodb+srv://${dbUser}:${dbPass}@firstmongo.6qallgs.mongodb.net/?appName=FirstMongo`).then(() =>
+const app = express();
+app.use(express.json());//Use JSON for all API passage
+
+mongoose.connect(`mongodb+srv://${dbUser}:${dbPass}@firstmongo.6qallgs.mongodb.net/${databaseName}?appName=FirstMongo/`).then(() =>
 {
 	console.log('MongoDB Connected');
 	
@@ -18,50 +21,38 @@ mongoose.connect(`mongodb+srv://${dbUser}:${dbPass}@firstmongo.6qallgs.mongodb.n
 	{
 		console.log('Server started on port 3000!');
 	});
-}).catch((err) => {
+}).catch((err) =>
+{
 	console.log(err);
 });
 
 //API Methods
-app.get("/", (req, res) =>
+/**
+ * CORS Handler
+ */
+app.use((req, res, next) => {
+	res.header('Access-Control-Allow-Origin', '*');
+	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+	
+	if(req.method === 'OPTIONS')
+	{
+		res.status(200);
+		res.send('OKAY :D');
+	}
+	else
+	{
+		next();
+	}
+});
+
+/**
+ * Resource retrieval
+ */
+app.get("/", async(req, res) =>
 {
+	res.status(418);
 	res.send("We are cooking");
 });
 
-app.get("/books", (req, res) =>
-{
-	//return all books (title & id) -- additionally, prep for query input -> undef, true, & false
-	const avail = req.query;
-	switch(avail)
-	{
-		case "true":
-			//get all available books
-			break;
-		case "false":
-			//get all unavailable books
-			break;
-		default:
-			//get all books (no query provided)
-			break;
-	}
-})
-
-app.get("/books/:id", (req, res) =>
-{
-	//Return the specific book at 'id'. 404 if no ID exists.
-})
-
-app.post("/books", (req, res) =>
-{
-	//Add a new book as defined within the JSON file
-})
-
-app.put("/books/:id", (req, res) =>
-{
-	//For the respective book id, update its properties as put (hehe) in the JSON file. Checkin or out.
-})
-
-app.delete("/books/:id", (req, res) =>
-{
-	//Remove a book given its respective id.
-})
+app.use("/books", BookRoute);
